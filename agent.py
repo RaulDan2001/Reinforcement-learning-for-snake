@@ -16,7 +16,7 @@ class Agent(object):
         self.epsilon = 0 #randomizare
         self.gamma = 0.9 #rata de discount
         self.memory = deque(maxlen=MAX_MEMORY)
-        self.model = Linear_QNet(13, 256, 256, 3)
+        self.model = Linear_QNet(17, 256, 256, 3)
         self.trainer = QTrainer(self.model, lr=LEARNING_RATE, gamma=self.gamma)
 
 
@@ -70,10 +70,18 @@ class Agent(object):
             game.food.y < game.head.y, #este mancare in partea de sus
             game.food.y > game.head.y, #este mancare in partea de jos
 
-            #distantele Manhattan (normalizate)
+            #distantele Manhattan 
             distance_x,
             distance_y,
             ]
+
+        #awareness pentru blocurile din jurul sarpelui
+        state.extend([
+            game.is_collision(Point(head.x - 4*BLOCK_SIZE, head.y)),
+            game.is_collision(Point(head.x + 4*BLOCK_SIZE, head.y)),
+            game.is_collision(Point(head.x, head.y - 4*BLOCK_SIZE)),
+            game.is_collision(Point(head.x, head.y + 4*BLOCK_SIZE)),
+            ])
 
         return np.array(state, dtype=int)
 

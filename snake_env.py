@@ -28,10 +28,13 @@ BLACK = (0, 0, 0)
 SOFT_YELLOW = (255, 255, 204)
 LIGHT_GREEN = (144, 238, 144)
 
+
 class SnakeEnv(object):
     def __init__(self,width=640, height=480):
         self.width = width
         self.height = height
+        #lista pentru locuri recent vizitate
+        self.recent_visits = {}
         #initializez fereastra de afisare
         self.display = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption('Snake')
@@ -82,13 +85,13 @@ class SnakeEnv(object):
         reward = 0
         if self.is_collision() or self.frame_iteration > 100*len(self.snake):
             game_over = True
-            reward = -10
+            reward += -10
             return reward, game_over, self.score
         
         #pun mancare noua sau doar misc sarpele
         if self.head == self.food:
             self.score += 1
-            reward = 10
+            reward += 10
             self._place_food()
         else:
             self.snake.pop()
@@ -96,19 +99,32 @@ class SnakeEnv(object):
         #calculez distanta Manhattan pana la mancare
         current_distance = abs(self.head.x - self.food.x) + abs(self.head.y - self.food.y)
         previous_distance = abs(self.snake[1].x - self.food.x) + abs(self.snake[1].y - self.food.y)
-
+        
         #acord reward pentru miscare in directia mancarii
         if current_distance <  previous_distance:
-            reward +=1
+            reward +=0.5
         else:
             reward -= 0.5
-
+        
         #penalizare pentru mers in cercuri
         if self.head in self.snake[1:]:
             reward -= 1
 
         #recompensa negativa pentru fiecare miscare
         reward -= 0.01
+
+        #penalizare pentru revizitarea acelorasi locuri pentru a evita propria incercuire
+        if self.head in self.recent_visits:
+            reward -= 1
+        self.recent_visits[self.head] = self.frame_iteration
+
+        #sterg puncte vechi pentru a evita memory overflow
+        if len(self.recent_visits) > 100:
+            oldest_key = list(self.recent_visits.keys())[0]
+            del self.recent_visits[oldest_key]
+
+        open_blocks = self.count_free_blocks(self.head)
+        reward += open_blocks * 0.05
 
         #actualizez interfata pygame si clock
         self._update_ui()
@@ -176,6 +192,18 @@ class SnakeEnv(object):
             y += BLOCK_SIZE
     
         self.head = Point(x, y)
+
+    def count_free_blocks(self, point, max_distance=5):
+        free_blocks = 0
+        directions = [(1,0), (-1,0), (0,1), (0,-1)] # dreapta, stanga, jos, sus
+        for dx, dy in directions:
+            for dist in range(1, max_distance + 1):
+                check_point = Point(point.x + dx * dist * BLOCK_SIZE, point.y + dy * dist * BLOCK_SIZE)
+                if self.is_collision(check_point):
+                    break #opresc verificarea in aceasta directie daca avem coliziune
+                free_blocks +=1
+        return free_blocks
+
 
 
 
