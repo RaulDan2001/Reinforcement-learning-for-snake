@@ -1,4 +1,3 @@
-import pygame
 from agent import Agent
 from snake_env import SnakeEnv
 from plotter import plot

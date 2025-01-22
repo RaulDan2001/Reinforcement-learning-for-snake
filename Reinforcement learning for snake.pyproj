@@ -27,6 +27,7 @@
     <Compile Include="plotter.py" />
     <Compile Include="snakeAppUI.py" />
     <Compile Include="snake_env.py" />
+    <Compile Include="snakeGame.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

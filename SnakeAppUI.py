@@ -1,7 +1,9 @@
-import customtkinter as ctk
+from snakeGame import SnakeGame
 from snake_env import SnakeEnv
 from agent import Agent
 from plotter import plot
+import customtkinter as ctk
+import pygame
 
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
@@ -31,6 +33,18 @@ class SnakeAppUI(object):
     def play_human(self):
         self.root.withdraw()
         #TODO: cod pentru joc uman
+        game = SnakeGame()
+
+        #loop pentru joc
+        while True:
+            game_over, score = game.play_frame()
+
+            #resetez cand e gata jocul 
+            if game_over:
+                game.reset()
+                print(f"Final score {score}")
+
+        
 
     def play_robot(self):
         self.root.withdraw()
